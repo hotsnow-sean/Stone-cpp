@@ -141,20 +141,25 @@
   <ItemGroup>
     <ClInclude Include="ASTNodeType.h" />
     <ClInclude Include="ASTree.h" />
+    <ClInclude Include="BasicEnv.h" />
     <ClInclude Include="BasicParse.h" />
+    <ClInclude Include="Environment.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Parse.hpp" />
     <ClInclude Include="ParseException.h" />
+    <ClInclude Include="SObject.h" />
     <ClInclude Include="StoneException.h" />
     <ClInclude Include="Token.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ASTNodeType.cpp" />
     <ClCompile Include="ASTree.cpp" />
+    <ClCompile Include="BasicEnv.cpp" />
     <ClCompile Include="BasicParse.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ParseException.cpp" />
+    <ClCompile Include="SObject.cpp" />
     <ClCompile Include="Token.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

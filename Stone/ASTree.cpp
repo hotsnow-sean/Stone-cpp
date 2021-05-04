@@ -28,6 +28,10 @@ std::string ASTLeaf::toString() const noexcept {
     return m_token->getText();
 }
 
+SObject::ptr ASTLeaf::eval(Environment& env) const {
+    throw StoneException("cannot eval: " + toString());
+}
+
 ASTList::ASTList(const std::vector<ASTree::c_ptr>& list) : m_children(list) {}
 
 bool ASTList::isLeaf() const noexcept {
@@ -63,4 +67,8 @@ std::string ASTList::toString() const {
         builder.append(t->toString());
     }
     return builder + ")";
+}
+
+SObject::ptr ASTList::eval(Environment& env) const {
+    throw StoneException("cannot eval: " + toString());
 }

@@ -3,6 +3,7 @@
 // ASTree 语法树存储形式，存储终结符或者子节点数组
 
 #include "Token.h"
+#include "Environment.h"
 #include <vector>
 
 class ASTree
@@ -19,6 +20,7 @@ public:
 	virtual ASTree::c_ptr child(size_t i) const = 0;
 	virtual std::string location() const = 0;
 	virtual std::string toString() const = 0;
+	virtual SObject::ptr eval(Environment& env) const = 0;
 };
 
 class ASTLeaf : public ASTree {
@@ -35,6 +37,7 @@ public:
 	ASTree::c_ptr child(size_t i) const final;
 	virtual std::string location() const noexcept override;
 	virtual std::string toString() const noexcept override;
+	virtual SObject::ptr eval(Environment& env) const override;
 };
 
 class ASTList : public ASTree {
@@ -51,5 +54,6 @@ public:
 	virtual ASTree::c_ptr child(size_t i) const override;
 	virtual std::string location() const override;
 	virtual std::string toString() const override;
+	virtual SObject::ptr eval(Environment& env) const override;
 };
 

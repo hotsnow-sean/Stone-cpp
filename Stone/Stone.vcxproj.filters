@@ -22,6 +22,9 @@
     <Filter Include="语法分析器">
       <UniqueIdentifier>{554e2eab-0922-4fb3-9898-6991e4612267}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Stone语言">
+      <UniqueIdentifier>{485108e5-b430-4b20-8f0b-3a88931af1c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Token.h">
@@ -48,6 +51,15 @@
     <ClInclude Include="ASTNodeType.h">
       <Filter>语法分析器</Filter>
     </ClInclude>
+    <ClInclude Include="SObject.h">
+      <Filter>Stone语言</Filter>
+    </ClInclude>
+    <ClInclude Include="Environment.h">
+      <Filter>Stone语言</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicEnv.h">
+      <Filter>Stone语言</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Token.cpp">
@@ -70,6 +82,12 @@
     </ClCompile>
     <ClCompile Include="ASTNodeType.cpp">
       <Filter>语法分析器</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicEnv.cpp">
+      <Filter>Stone语言</Filter>
+    </ClCompile>
+    <ClCompile Include="SObject.cpp">
+      <Filter>Stone语言</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
