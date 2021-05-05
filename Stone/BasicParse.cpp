@@ -1,18 +1,16 @@
 #include "BasicParse.h"
-#include "ASTNodeType.h"
 
 BasicParse::BasicParse(Lexer& l) : m_lexer(l) {
-	auto expr = m_factory.rule<>();
+	expr = m_factory.rule<>();
+	block = m_factory.rule<BlockStmnt>();
 
-	auto block = m_factory.rule<BlockStmnt>();
-
-	auto primary = m_factory.orRule({
-		m_factory.rule<>()->sep({"("})->ast(expr)->sep({"}"}),
+	primary = m_factory.rule<PaimaryExpr>(true)->Or({
+		m_factory.rule<>()->sep({"("})->ast(expr)->sep({")"}),
 		m_factory.rule<>()->number<NumberLiteral>(),
-		m_factory.rule<>()->identifier<Name>({";","}",Token::eol}),
+		m_factory.rule<>()->identifier<Name>({ ";","}",Token::eol, ")" }),
 		m_factory.rule<>()->string<StringLiteral>() });
 
-	auto factor = m_factory.orRule({
+	factor = m_factory.orRule({
 		m_factory.rule<NegativeExpr>()->sep({"-"})->ast(primary),
 		primary });
 
@@ -28,10 +26,12 @@ BasicParse::BasicParse(Lexer& l) : m_lexer(l) {
 		{"%", {4, true}}
 		});
 
-	auto statement = m_factory.orRule({
+	simple = m_factory.rule<>()->ast(expr);
+
+	statement = m_factory.orRule({
 		m_factory.rule<IfStmnt>()->sep({"if"})->ast(expr)->ast(block)->option(m_factory.rule<>()->sep({"else"})->ast(block)),
 		m_factory.rule<WhileStmnt>()->sep({"while"})->ast(expr)->ast(block),
-		expr });
+		simple });
 
 	block->sep({ "{" })
 		->option(statement)

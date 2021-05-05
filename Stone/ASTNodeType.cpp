@@ -1,11 +1,12 @@
 #include "ASTNodeType.h"
+#include "BasicType.h"
 
 int NumberLiteral::value() const {
 	return token()->getNumber();
 }
 
 SObject::ptr NumberLiteral::eval(Environment& env) const {
-	return SObject::createInterger(value());
+	return SObject::ptr(new Integer(value()));
 }
 
 std::string Name::name() const {
@@ -14,7 +15,7 @@ std::string Name::name() const {
 
 SObject::ptr Name::eval(Environment& env) const {
 	auto value = env.get(name());
-	if (value == SObject::getNull()) throw StoneException("undefined name: " + name());
+	if (value == nullptr) throw StoneException("undefined name: " + name());
 	return value;
 }
 
@@ -45,9 +46,9 @@ SObject::ptr BinaryExpr::eval(Environment& env) const {
 		if (o == "*") return l->__mul__(r);
 		if (o == "/") return l->__div__(r);
 		if (o == "%") return l->__mod__(r);
-		if (o == "==") return SObject::createBoolean(l->__eq__(r));
-		if (o == ">") return SObject::createBoolean(l->__gt__(r));
-		if (o == "<") return SObject::createBoolean(l->__lt__(r));
+		if (o == "==") return SObject::ptr(new Boolean(l->__eq__(r)));
+		if (o == ">") return SObject::ptr(new Boolean(l->__gt__(r)));
+		if (o == "<") return SObject::ptr(new Boolean(l->__lt__(r)));
 		throw StoneException("bad operator");
 	}
 }
@@ -61,8 +62,9 @@ std::string NegativeExpr::toString() const {
 }
 
 SObject::ptr NegativeExpr::eval(Environment& env) const {
-	auto v = oprand()->eval(env);
-	return SObject::createInterger(-(SObject::getNumber(v)));
+	auto v = std::dynamic_pointer_cast<Integer>(oprand()->eval(env));
+	if (v) return SObject::ptr(new Integer(v->value()));
+	throw StoneException("bad type for '-'");
 }
 
 ASTree::c_ptr IfStmnt::condition() const {
@@ -89,7 +91,7 @@ SObject::ptr IfStmnt::eval(Environment& env) const {
 	bool c = condition()->eval(env)->__bool__();
 	if (c) return thenBlock()->eval(env);
 	auto b = elseBlock();
-	if (!b) return SObject::getNull();
+	if (!b) return nullptr;
 	return b->eval(env);
 }
 
@@ -109,7 +111,7 @@ SObject::ptr WhileStmnt::eval(Environment& env) const {
 	SObject::ptr ret;
 	while (condition()->eval(env)->__bool__()) ret = body()->eval(env);
 	if (ret) return ret;
-	return SObject::getNull();
+	return nullptr;
 }
 
 std::string StringLiteral::value() const {
@@ -117,7 +119,7 @@ std::string StringLiteral::value() const {
 }
 
 SObject::ptr StringLiteral::eval(Environment& env) const {
-	return SObject::createString(value());
+	return SObject::ptr(new String(value()));
 }
 
 SObject::ptr BlockStmnt::eval(Environment& env) const {
@@ -127,4 +129,83 @@ SObject::ptr BlockStmnt::eval(Environment& env) const {
 		ret = child(i)->eval(env);
 	}
 	return ret;
+}
+
+std::string ParameterList::name(int i) const {
+	return child(i)->token()->getText();
+}
+
+int ParameterList::size() const noexcept {
+	return numChildren();
+}
+
+void ParameterList::eval(Environment* env, int index, SObject::ptr value) const {
+	env->putNew(name(index), value);
+}
+
+std::string DefStmnt::name() const {
+	return child(0)->token()->getText();
+}
+
+ASTree::c_ptr DefStmnt::parameters() const {
+	return child(1);
+}
+
+ASTree::c_ptr DefStmnt::body() const {
+	return child(2);
+}
+
+std::string DefStmnt::toString() const {
+	return "(def " + name() + " " + parameters()->toString() + " " + body()->toString() + ")";
+}
+
+SObject::ptr DefStmnt::eval(Environment& env) const {
+	env.putNew(name(), SObject::ptr(new Function(parameters(), body(), &env)));
+	return SObject::ptr(new String(name()));
+}
+
+int Arguments::size() const noexcept {
+	return numChildren();
+}
+
+SObject::ptr Arguments::eval(Environment& env, SObject::ptr value) const {
+	auto func = std::dynamic_pointer_cast<Function>(value);
+	if (!func) throw StoneException("bad function");
+	auto params = std::dynamic_pointer_cast<const ParameterList>(func->parameters());
+	if (!params) throw StoneException("bad parameters");
+	if (size() != params->size()) throw StoneException("bas number of arguments");
+	Environment* newEnv = func->makeEnv(); // 创建一个临时的函数计算环境
+	int num = 0, sum = numChildren();
+	for (int i = 0; i < sum; i++) {
+		params->eval(newEnv, num++, child(i)->eval(env));
+	}
+	auto ret = func->body()->eval(*newEnv);
+	delete newEnv; // 返回运行结果前销毁函数上下文
+	return ret;
+}
+
+ASTree::c_ptr PaimaryExpr::operand() const {
+	return child(0);
+}
+
+ASTree::c_ptr PaimaryExpr::postfix(int nest) const {
+	return child(numChildren() - nest - 1);
+}
+
+bool PaimaryExpr::hasPostfix(int nest) const {
+	return numChildren() - nest > 1;
+}
+
+SObject::ptr PaimaryExpr::eval(Environment& env) const {
+	return evalSubExpr(env, 0);
+}
+
+SObject::ptr PaimaryExpr::evalSubExpr(Environment& env, int nest) const {
+	if (hasPostfix(nest)) {
+		auto target = evalSubExpr(env, nest + 1);
+		auto p = postfix(nest);
+		auto po = std::dynamic_pointer_cast<const Postfix>(p);
+		return po->eval(env, target);
+	}
+	return operand()->eval(env);
 }

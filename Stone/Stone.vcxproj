@@ -143,8 +143,11 @@
     <ClInclude Include="ASTree.h" />
     <ClInclude Include="BasicEnv.h" />
     <ClInclude Include="BasicParse.h" />
+    <ClInclude Include="BasicType.h" />
     <ClInclude Include="Environment.h" />
+    <ClInclude Include="FuncParser.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="NestedEnv.h" />
     <ClInclude Include="Parse.hpp" />
     <ClInclude Include="ParseException.h" />
     <ClInclude Include="SObject.h" />
@@ -156,8 +159,11 @@
     <ClCompile Include="ASTree.cpp" />
     <ClCompile Include="BasicEnv.cpp" />
     <ClCompile Include="BasicParse.cpp" />
+    <ClCompile Include="BasicType.cpp" />
+    <ClCompile Include="FuncParser.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NestedEnv.cpp" />
     <ClCompile Include="ParseException.cpp" />
     <ClCompile Include="SObject.cpp" />
     <ClCompile Include="Token.cpp" />

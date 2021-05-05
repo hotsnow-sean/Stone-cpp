@@ -6,6 +6,6 @@ void BasicEnv::put(const std::string& name, SObject::ptr value) {
 
 SObject::ptr BasicEnv::get(const std::string& name) {
     auto ret = m_values.find(name);
-    if (ret == m_values.end()) return SObject::getNull();
+    if (ret == m_values.end()) return nullptr;
     return ret->second;
 }
