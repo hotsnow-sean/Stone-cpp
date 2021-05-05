@@ -1,6 +1,7 @@
 #include "ASTree.h"
 #include "StoneException.h"
 #include <stdexcept>
+#include <ostream>
 
 ASTLeaf::ASTLeaf(Token::c_ptr t) : m_token(t) {}
 
@@ -71,4 +72,9 @@ std::string ASTList::toString() const {
 
 SObject::ptr ASTList::eval(Environment& env) const {
     throw StoneException("cannot eval: " + toString());
+}
+
+std::ostream& operator<<(std::ostream& os, const ASTree::c_ptr& ast) {
+    os << ast->toString();
+    return os;
 }

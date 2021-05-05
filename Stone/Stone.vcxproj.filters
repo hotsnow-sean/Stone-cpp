@@ -60,6 +60,15 @@
     <ClInclude Include="BasicEnv.h">
       <Filter>Stone语言</Filter>
     </ClInclude>
+    <ClInclude Include="FuncParser.h">
+      <Filter>语法分析器</Filter>
+    </ClInclude>
+    <ClInclude Include="NestedEnv.h">
+      <Filter>Stone语言</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicType.h">
+      <Filter>Stone语言</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Token.cpp">
@@ -87,6 +96,15 @@
       <Filter>Stone语言</Filter>
     </ClCompile>
     <ClCompile Include="SObject.cpp">
+      <Filter>Stone语言</Filter>
+    </ClCompile>
+    <ClCompile Include="FuncParser.cpp">
+      <Filter>语法分析器</Filter>
+    </ClCompile>
+    <ClCompile Include="NestedEnv.cpp">
+      <Filter>Stone语言</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicType.cpp">
       <Filter>Stone语言</Filter>
     </ClCompile>
   </ItemGroup>

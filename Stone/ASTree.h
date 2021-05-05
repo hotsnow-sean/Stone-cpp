@@ -57,3 +57,5 @@ public:
 	virtual SObject::ptr eval(Environment& env) const override;
 };
 
+std::ostream& operator<<(std::ostream& os, const ASTree::c_ptr& ast);
+

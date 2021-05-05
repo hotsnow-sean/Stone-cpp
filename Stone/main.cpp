@@ -1,17 +1,34 @@
 #include "Lexer.h"
-#include "BasicParse.h"
-#include "BasicEnv.h"
+#include "FuncParser.h"
+#include "NestedEnv.h"
 #include <iostream>
+#include <fstream>
 using namespace std;
 
-int main() {
-	Lexer l(cin); // 分词器，传入标准输入流，也可以传入文件输入流
-	BasicParse bp(l); // 语法分析器
-	BasicEnv env; // 上下文环境管理器
-	while (l.peek(0) != Token::eof) {
-		auto ast = bp.parse();
-		auto r = ast->eval(env);
-		cout << "=> " << r->__str__() << endl;
+static void testFile(const char* file) {
+	ifstream ifs(file);
+	if (!ifs.is_open()) {
+		cerr << "File open fail... : " << file << endl;
+		return;
 	}
+	Lexer l(ifs);
+	FuncParser fp(l); // 语法分析器
+	NestedEnv env;
+	while (l.peek(0) != Token::eof) {
+		try {
+			auto ast = fp.parse();
+			cout << "=> " << ast << endl;
+			auto result = ast->eval(env);
+			cout << "=> " << result << endl;
+		} catch (const std::exception& e) {
+			cerr << e.what() << endl;
+			return;
+		}
+	}
+}
+
+int main() {
+	testFile("D:/02_MyCode/VSrepos/test.txt");
+	system("PAUSE");
 	return 0;
 }

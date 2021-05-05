@@ -29,6 +29,19 @@ public:
 	virtual SObject::ptr eval(Environment& env) const override;
 };
 
+class PaimaryExpr : public ASTList {
+public:
+	using ASTList::ASTList;
+
+	ASTree::c_ptr operand() const;
+	ASTree::c_ptr postfix(int nest) const;
+
+	bool hasPostfix(int nest) const;
+
+	virtual SObject::ptr eval(Environment& env) const override;
+	SObject::ptr evalSubExpr(Environment& env, int nest) const;
+};
+
 class BinaryExpr : public ASTList {
 public:
 	using ASTList::ASTList;
@@ -74,4 +87,46 @@ public:
 	ASTree::c_ptr body() const;
 	std::string toString() const final;
 	virtual SObject::ptr eval(Environment& env) const override;
+};
+
+class NullStmnt : public ASTList {
+public:
+	using ASTList::ASTList;
+};
+
+class ParameterList : public ASTList {
+public:
+	using ASTList::ASTList;
+
+	std::string name(int i) const;
+	int size() const noexcept;
+
+	void eval(Environment* env, int index, SObject::ptr value) const;
+};
+
+class DefStmnt : public ASTList {
+public:
+	using ASTList::ASTList;
+
+	std::string name() const;
+	ASTree::c_ptr parameters() const;
+	ASTree::c_ptr body() const;
+	std::string toString() const final;
+	virtual SObject::ptr eval(Environment& env) const override;
+};
+
+class Postfix : public ASTList {
+public:
+	using ASTList::ASTList;
+
+	virtual SObject::ptr eval(Environment& env, SObject::ptr value) const = 0;
+};
+
+class Arguments : public Postfix {
+public:
+	using Postfix::Postfix;
+
+	int size() const noexcept;
+
+	SObject::ptr eval(Environment& env, SObject::ptr value) const final;
 };
