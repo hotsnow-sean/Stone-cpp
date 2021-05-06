@@ -144,6 +144,7 @@
     <ClInclude Include="BasicEnv.h" />
     <ClInclude Include="BasicParse.h" />
     <ClInclude Include="BasicType.h" />
+    <ClInclude Include="ClassParser.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="FuncParser.h" />
     <ClInclude Include="Lexer.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="BasicEnv.cpp" />
     <ClCompile Include="BasicParse.cpp" />
     <ClCompile Include="BasicType.cpp" />
+    <ClCompile Include="ClassParser.cpp" />
     <ClCompile Include="FuncParser.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />

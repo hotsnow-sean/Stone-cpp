@@ -1,5 +1,5 @@
 #include "Lexer.h"
-#include "FuncParser.h"
+#include "ClassParser.h"
 #include "NestedEnv.h"
 #include "Natives.h"
 #include <iostream>
@@ -13,17 +13,23 @@ static void testFile(const char* file) {
 		return;
 	}
 	Lexer l(ifs);
-	FuncParser fp(l); // 语法分析器
+	ClassParser cp(l); // 类语法分析器
 	NestedEnv env;
 	Natives::environment(env); // 添加内置函数
 	while (l.peek(0) != Token::eof) {
 		try {
-			fp.parse()->eval(env);
+			/*auto ast = cp.parse();
+			cout << "=> " << ast << endl;
+			auto o = ast->eval(env);
+			cout << "===> " << o << endl;*/
+			cp.parse()->eval(env);
 		} catch (const std::exception& e) {
 			cerr << e.what() << endl;
+			ifs.close();
 			return;
 		}
 	}
+	ifs.close();
 }
 
 int main() {

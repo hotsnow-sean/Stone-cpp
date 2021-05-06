@@ -314,6 +314,13 @@ public:
 		m_rules.clear();
 	}
 
+	void pop() noexcept {
+		if (m_rules.size()) {
+			delete m_rules.back();
+			m_rules.pop_back();
+		}
+	}
+
 	// Í¨¹ý Rule ¼Ì³Ð
 	virtual ASTree::c_ptr parse(Lexer& l) override {
 		std::vector<ASTree::c_ptr> list;

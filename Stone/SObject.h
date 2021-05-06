@@ -12,6 +12,7 @@ public:
 
 public:
 	SObject(const std::shared_ptr<const std::string>& name);
+	virtual ~SObject() = default;
 
 	virtual bool __lt__(SObject::c_ptr other) const;
 	virtual bool __gt__(SObject::c_ptr other) const;

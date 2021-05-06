@@ -4,7 +4,7 @@ BasicParse::BasicParse(Lexer& l) : m_lexer(l) {
 	expr = m_factory.rule<>();
 	block = m_factory.rule<BlockStmnt>();
 
-	primary = m_factory.rule<PaimaryExpr>(true)->Or({
+	primary = m_factory.rule<PrimaryExpr>(true)->Or({
 		m_factory.rule<>()->sep({"("})->ast(expr)->sep({")"}),
 		m_factory.rule<>()->number<NumberLiteral>(),
 		m_factory.rule<>()->identifier<Name>({ ";","}",Token::eol, ")" }),
@@ -26,7 +26,7 @@ BasicParse::BasicParse(Lexer& l) : m_lexer(l) {
 		{"%", {4, true}}
 		});
 
-	simple = m_factory.rule<PaimaryExpr>(true)->ast(expr);
+	simple = m_factory.rule<PrimaryExpr>(true)->ast(expr);
 
 	statement = m_factory.orRule({
 		m_factory.rule<IfStmnt>()->sep({"if"})->ast(expr)->ast(block)->option(m_factory.rule<>()->sep({"else"})->ast(block)),

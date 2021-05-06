@@ -1,6 +1,7 @@
 #include "ASTNodeType.h"
 #include "BasicType.h"
 #include "StoneException.h"
+#include "NestedEnv.h"
 
 int NumberLiteral::value() const {
 	return token()->getNumber();
@@ -36,6 +37,22 @@ SObject::ptr BinaryExpr::eval(Environment& env) const {
 	std::string o = op();
 	auto r = right()->eval(env);
 	if (o == "=") {
+		auto p = std::dynamic_pointer_cast<const PrimaryExpr>(left());
+		if (p && p->hasPostfix(0)) {
+			auto member = std::dynamic_pointer_cast<const Dot>(p->postfix(0));
+			if (member) { // 若链式调用的最后是点成员变量运算
+				auto obj = std::dynamic_pointer_cast<StoneObject>(p->evalSubExpr(env, 1));
+				if (obj) { // 确保运算调用者是实例对象
+					try {
+						obj->write(member->name(), r); // 为对象的成员赋值
+						return r;
+					} catch (const std::exception&) {
+						throw StoneException("bad member access " + location() + ": " + member->name());
+					}
+				}
+			}
+		}
+		// 普通变量的赋值操作
 		auto n = std::dynamic_pointer_cast<const Name>(left());
 		if (!n) throw StoneException("bad assignment");
 		env.put(n->name(), r);
@@ -196,23 +213,23 @@ SObject::ptr Arguments::eval(Environment& env, SObject::ptr value) const {
 	return ret;
 }
 
-ASTree::c_ptr PaimaryExpr::operand() const {
+ASTree::c_ptr PrimaryExpr::operand() const {
 	return child(0);
 }
 
-ASTree::c_ptr PaimaryExpr::postfix(int nest) const {
-	return child(numChildren() - nest - 1);
+ASTree::c_ptr PrimaryExpr::postfix(int nest) const {
+	return child((size_t)numChildren() - nest - 1);
 }
 
-bool PaimaryExpr::hasPostfix(int nest) const {
+bool PrimaryExpr::hasPostfix(int nest) const {
 	return numChildren() - nest > 1;
 }
 
-SObject::ptr PaimaryExpr::eval(Environment& env) const {
+SObject::ptr PrimaryExpr::eval(Environment& env) const {
 	return evalSubExpr(env, 0);
 }
 
-SObject::ptr PaimaryExpr::evalSubExpr(Environment& env, int nest) const {
+SObject::ptr PrimaryExpr::evalSubExpr(Environment& env, int nest) const {
 	if (hasPostfix(nest)) {
 		auto target = evalSubExpr(env, nest + 1);
 		auto p = postfix(nest);
@@ -220,4 +237,69 @@ SObject::ptr PaimaryExpr::evalSubExpr(Environment& env, int nest) const {
 		return po->eval(env, target);
 	}
 	return operand()->eval(env);
+}
+
+std::string ClassStmnt::name() const {
+	return child(0)->token()->getText();
+}
+
+std::string ClassStmnt::superClass() const {
+	if (numChildren() < 3) return "";
+	return child(1)->token()->getText();
+}
+
+ASTree::c_ptr ClassStmnt::body() const {
+	return child((size_t)numChildren() - 1);
+}
+
+std::string ClassStmnt::toString() const {
+	std::string parent = superClass();
+	if (parent.empty()) parent += "*";
+	return "(class " + name() + " " + parent + " " + body()->toString() + ")";
+}
+
+SObject::ptr ClassStmnt::eval(Environment& env) const {
+	env.put(name(), SObject::ptr(new ClassInfo(this->shared_from_this(), &env)));
+	return SObject::ptr(new String(name()));
+}
+
+std::string Dot::name() const {
+	return child(0)->token()->getText();
+}
+
+std::string Dot::toString() const {
+	return "." + name();
+}
+
+SObject::ptr Dot::eval(Environment& env, SObject::ptr value) const {
+	std::string member = name();
+	auto ci = std::dynamic_pointer_cast<ClassInfo>(value);
+	if (ci && member == "new") {
+		auto e = new NestedEnv(ci->environment());
+		SObject::ptr so(new StoneObject(e));
+		initObject(ci, e);
+		return so;
+	}
+	auto so = std::dynamic_pointer_cast<StoneObject>(value);
+	if (so) {
+		try {
+			return so->read(member);
+		} catch (const std::exception&) {}
+	}
+	throw StoneException("bad member access: " + member + " " + location());
+}
+
+void Dot::initObject(SObject::ptr ci, Environment* env) const {
+	auto c = std::dynamic_pointer_cast<ClassInfo>(ci);
+	auto p = c->superClass();
+	if (p) initObject(p, env);
+	c->body()->eval(*env);
+}
+
+SObject::ptr ClassBody::eval(Environment& env) const {
+	int num = numChildren();
+	for (int i = 0; i < num; i++) {
+		child(i)->eval(env);
+	}
+	return nullptr;
 }

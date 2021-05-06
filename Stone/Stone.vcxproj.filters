@@ -72,6 +72,9 @@
     <ClInclude Include="Natives.h">
       <Filter>Stone语言</Filter>
     </ClInclude>
+    <ClInclude Include="ClassParser.h">
+      <Filter>语法分析器</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Token.cpp">
@@ -112,6 +115,9 @@
     </ClCompile>
     <ClCompile Include="Natives.cpp">
       <Filter>Stone语言</Filter>
+    </ClCompile>
+    <ClCompile Include="ClassParser.cpp">
+      <Filter>语法分析器</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@ protected:
 	ListRule<>* paramList;
 	ListRule<DefStmnt>* def;
 	ListRule<Arguments>* args;
-	ListRule<>* postfix;
+	Rule* postfix;
 
 public:
 	FuncParser(Lexer& l);

@@ -29,7 +29,7 @@ public:
 	virtual SObject::ptr eval(Environment& env) const override;
 };
 
-class PaimaryExpr : public ASTList {
+class PrimaryExpr : public ASTList {
 public:
 	using ASTList::ASTList;
 
@@ -129,4 +129,37 @@ public:
 	int size() const noexcept;
 
 	SObject::ptr eval(Environment& env, SObject::ptr value) const final;
+};
+
+class ClassBody : public ASTList {
+public:
+	using ASTList::ASTList;
+
+	virtual SObject::ptr eval(Environment& env) const override;
+};
+
+class ClassStmnt : public ASTList, public std::enable_shared_from_this<ClassStmnt> {
+public:
+	using ASTList::ASTList;
+
+	std::string name() const;
+	std::string superClass() const;
+	ASTree::c_ptr body() const;
+	std::string toString() const final;
+
+	virtual SObject::ptr eval(Environment& env) const override;
+};
+
+class Dot : public Postfix {
+public:
+	using Postfix::Postfix;
+
+	std::string name() const;
+	std::string toString() const final;
+
+	// Í¨¹ý Postfix ¼Ì³Ð
+	virtual SObject::ptr eval(Environment& env, SObject::ptr value) const override;
+
+protected:
+	void initObject(SObject::ptr ci, Environment* env) const;
 };

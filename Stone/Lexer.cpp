@@ -88,15 +88,20 @@ bool Lexer::fillQueue(size_t i) {
 void Lexer::readLine() {
 	std::string line;
 	try {
-		std::getline(reader, line);
+		while (line.empty() && reader.good()) {
+			std::getline(reader, line);
+			line_number++;
+		}
 	} catch (std::ios_base::failure e) {
 		throw ParseException(e.what());
 	}
-	if (line.empty()) {
+	if (reader.eof()) {
 		has_more = false;
-		return;
+	} else if (!reader.good()) {
+		has_more = false;
+		throw ParseException("input stream error: at line " + std::to_string(line_number));
 	}
-	line_number++;
+	if (line.empty()) return;
 	std::smatch matcher;
 	while (line.size() && std::regex_search(line, matcher, pattern)) {
 		addToken(line_number, matcher);

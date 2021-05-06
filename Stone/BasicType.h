@@ -103,3 +103,39 @@ public:
 
 	std::string __str__() const noexcept final;
 };
+
+class ClassInfo : public SObject {
+protected:
+	ASTree::c_ptr definition;
+	SObject::ptr m_superClass;
+	Environment* env;
+
+public:
+	static const std::shared_ptr<const std::string> TYPE;
+	ClassInfo(ASTree::c_ptr cs, Environment* env);
+
+	std::string name() const;
+	SObject::ptr superClass() const;
+	ASTree::c_ptr body() const;
+	Environment* environment() const;
+
+	std::string __str__() const noexcept final;
+};
+
+class StoneObject : public SObject {
+protected:
+	Environment* env; // 保存对象的属性以及方法，在析构函数中释放，所以切勿把自身智能指针保存到env
+
+public:
+	static const std::shared_ptr<const std::string> TYPE;
+	StoneObject(Environment* env);
+	~StoneObject();
+
+	SObject::ptr read(const std::string& member);
+	void write(const std::string& member, SObject::ptr value);
+
+	std::string __str__() const noexcept final;
+
+protected:
+	Environment* getEnv(const std::string& member);
+};

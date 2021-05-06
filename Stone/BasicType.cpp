@@ -1,6 +1,7 @@
 #include "BasicType.h"
 #include "NestedEnv.h"
 #include "StoneException.h"
+#include "ASTNodeType.h"
 #include <sstream>
 
 // ******************** Integer ********************
@@ -123,4 +124,65 @@ std::string NativeFunction::__str__() const noexcept {
 	std::stringstream ss;
 	ss << "<native:" << this << ">";
 	return ss.str();
+}
+
+const std::shared_ptr<const std::string> ClassInfo::TYPE{ new std::string("ClassInfo") };
+ClassInfo::ClassInfo(ASTree::c_ptr cs, Environment* env) : SObject(TYPE), definition(cs), m_superClass(nullptr), env(env) {
+	auto d = std::dynamic_pointer_cast<const ClassStmnt>(definition);
+	if (!d) throw StoneException("bad class defination");
+	auto obj = env->get(d->superClass());
+	if (obj) {
+		auto o = std::dynamic_pointer_cast<ClassInfo>(obj);
+		if (!o) throw StoneException("unknown super class: " + d->superClass(), d);
+		m_superClass = o;
+	}
+}
+
+std::string ClassInfo::name() const {
+	auto d = std::dynamic_pointer_cast<const ClassStmnt>(definition);
+	return d->name();
+}
+
+SObject::ptr ClassInfo::superClass() const {
+	return m_superClass;
+}
+
+ASTree::c_ptr ClassInfo::body() const {
+	auto d = std::dynamic_pointer_cast<const ClassStmnt>(definition);
+	return d->body();
+}
+
+Environment* ClassInfo::environment() const {
+	return env;
+}
+
+std::string ClassInfo::__str__() const noexcept {
+	return "<class " + name() + ">";
+}
+
+const std::shared_ptr<const std::string> StoneObject::TYPE{ new std::string("StoneObject") };
+StoneObject::StoneObject(Environment* env) : SObject(TYPE), env(env) {}
+
+StoneObject::~StoneObject() {
+	delete env;
+}
+
+SObject::ptr StoneObject::read(const std::string& member) {
+	return getEnv(member)->get(member);
+}
+
+void StoneObject::write(const std::string& member, SObject::ptr value) {
+	getEnv(member)->putNew(member, value);
+}
+
+std::string StoneObject::__str__() const noexcept {
+	std::stringstream ss;
+	ss << "<object:" << this << ">";
+	return ss.str();
+}
+
+Environment* StoneObject::getEnv(const std::string& member) {
+	auto e = env->where(member);
+	if (e && e == env) return e;
+	throw StoneException("object member access error: " + member);
 }

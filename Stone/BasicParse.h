@@ -15,11 +15,11 @@ protected:
 
 	ListRule<>* program;	// [ statement ] (";" | EOL)
 	OrRule* statement;		// "if" expr block [ "else" block ] | "while" expr block | simple
-	ListRule<PaimaryExpr>* simple;		// expr
+	ListRule<PrimaryExpr>* simple;		// expr
 	ListRule<BlockStmnt>* block; // "{" [ statement ] { (";" | EOL) [ statement ] } "}"
 	ListRule<>* expr;		// factor { OP factor }
 	OrRule* factor;			// "-" primary | primary
-	ListRule<PaimaryExpr>* primary;	// "(" expr ")" | NUMBER | IDENTIFIER | STRING
+	ListRule<PrimaryExpr>* primary;	// "(" expr ")" | NUMBER | IDENTIFIER | STRING
 
 public:
 	BasicParse(Lexer& l);
