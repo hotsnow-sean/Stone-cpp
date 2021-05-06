@@ -26,7 +26,7 @@ BasicParse::BasicParse(Lexer& l) : m_lexer(l) {
 		{"%", {4, true}}
 		});
 
-	simple = m_factory.rule<>()->ast(expr);
+	simple = m_factory.rule<PaimaryExpr>(true)->ast(expr);
 
 	statement = m_factory.orRule({
 		m_factory.rule<IfStmnt>()->sep({"if"})->ast(expr)->ast(block)->option(m_factory.rule<>()->sep({"else"})->ast(block)),

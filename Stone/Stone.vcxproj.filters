@@ -69,6 +69,9 @@
     <ClInclude Include="BasicType.h">
       <Filter>Stone语言</Filter>
     </ClInclude>
+    <ClInclude Include="Natives.h">
+      <Filter>Stone语言</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Token.cpp">
@@ -105,6 +108,9 @@
       <Filter>Stone语言</Filter>
     </ClCompile>
     <ClCompile Include="BasicType.cpp">
+      <Filter>Stone语言</Filter>
+    </ClCompile>
+    <ClCompile Include="Natives.cpp">
       <Filter>Stone语言</Filter>
     </ClCompile>
   </ItemGroup>

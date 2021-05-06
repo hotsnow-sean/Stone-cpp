@@ -85,4 +85,21 @@ public:
 	std::string __str__() const noexcept final;
 };
 
+class NativeFunction : public SObject {
+public:
+	typedef SObject::ptr(*method_ptr)(const std::vector<SObject::ptr>&);
+	static const std::shared_ptr<const std::string> TYPE;
 
+protected:
+	std::string name;
+	method_ptr method;
+	int numParams;
+
+public:
+	NativeFunction(const std::string& name, method_ptr m, int argnum);
+
+	int numOfParameters() const noexcept;
+	SObject::ptr invoke(const std::vector<SObject::ptr>& args, ASTree::c_ptr);
+
+	std::string __str__() const noexcept final;
+};

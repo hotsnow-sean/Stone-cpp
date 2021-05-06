@@ -1,4 +1,5 @@
 #include "SObject.h"
+#include "StoneException.h"
 #include <ostream>
 
 SObject::SObject(const std::shared_ptr<const std::string>& name) : __name__(name) {}

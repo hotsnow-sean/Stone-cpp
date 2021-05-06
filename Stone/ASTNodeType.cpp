@@ -1,5 +1,6 @@
 #include "ASTNodeType.h"
 #include "BasicType.h"
+#include "StoneException.h"
 
 int NumberLiteral::value() const {
 	return token()->getNumber();
@@ -169,11 +170,22 @@ int Arguments::size() const noexcept {
 }
 
 SObject::ptr Arguments::eval(Environment& env, SObject::ptr value) const {
+	auto native = std::dynamic_pointer_cast<NativeFunction>(value);
+	if (native) {
+		int nparams = native->numOfParameters();
+		if (nparams != -1 && size() != nparams) throw StoneException("bad number of arguments " + this->location());
+		int sum = numChildren();
+		std::vector<SObject::ptr> args(sum);
+		for (int i = 0; i < sum; i++) {
+			args[i] = child(i)->eval(env);
+		}
+		return native->invoke(args, this->shared_from_this());
+	}
 	auto func = std::dynamic_pointer_cast<Function>(value);
-	if (!func) throw StoneException("bad function");
+	if (!func) throw StoneException("bad function " + this->location());
 	auto params = std::dynamic_pointer_cast<const ParameterList>(func->parameters());
-	if (!params) throw StoneException("bad parameters");
-	if (size() != params->size()) throw StoneException("bas number of arguments");
+	if (!params) throw StoneException("bad parameters " + this->location());
+	if (size() != params->size()) throw StoneException("bas number of arguments " + this->location());
 	Environment* newEnv = func->makeEnv(); // 创建一个临时的函数计算环境
 	int num = 0, sum = numChildren();
 	for (int i = 0; i < sum; i++) {

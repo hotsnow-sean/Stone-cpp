@@ -1,6 +1,5 @@
 #pragma once
 
-#include "StoneException.h"
 #include <memory>
 #include <string>
 

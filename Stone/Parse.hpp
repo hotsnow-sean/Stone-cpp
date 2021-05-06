@@ -84,7 +84,7 @@ public:
 };
 
 class SepLogic : public Logic {
-private:
+protected:
 	std::unordered_set<std::string> m_pat;
 public:
 	SepLogic(const std::unordered_set<std::string>& p) : m_pat(p) {}
@@ -132,15 +132,18 @@ public:
 	virtual bool ignore() const noexcept override { return true; }
 };
 
+template <typename T>
 class MaybeLogic : public Logic {
 private:
 	Rule* m_rule;
 public:
-	MaybeLogic(Rule* r) : m_rule(r) {}
+	MaybeLogic(Rule* r) : m_rule(r) {
+		static_assert(std::is_base_of<ASTList, T>::value, "maybe logic template must base of ASTList");
+	}
 	// Í¨¹ý Logic ¼Ì³Ð
 	virtual void parse(Lexer& l, std::vector<ASTree::c_ptr>& list) override {
 		if (match(l)) list.push_back(m_rule->parse(l));
-		else list.push_back(ASTree::c_ptr(new ASTList({})));
+		else list.push_back(ASTree::c_ptr(new T(std::vector<ASTree::c_ptr>())));
 	}
 	virtual bool match(Lexer& l) override {
 		return m_rule->match(l);
@@ -179,7 +182,7 @@ public:
 	virtual void parse(Lexer& l, std::vector<ASTree::c_ptr>& list) override {
 		while (match(l)) {
 			auto ast = m_rule->parse(l);
-			if (ast->isLeaf() || ast->numChildren()) list.push_back(ast);
+			if (ast) list.push_back(ast);
 		}
 	}
 	virtual bool match(Lexer& l) override {
@@ -284,8 +287,9 @@ public:
 		return this;
 	}
 
-	ListRule<T>* maybe(Rule* r) {
-		m_rules.push_back(new MaybeLogic(r));
+	template <typename E>
+	ListRule<T>* maybe(ListRule<E>* r) {
+		m_rules.push_back(new MaybeLogic<E>(r));
 		return this;
 	}
 
@@ -316,7 +320,10 @@ public:
 		for (auto r : m_rules) {
 			r->parse(l, list);
 		}
-		if (m_only && list.size() == 1) return list.front();
+		if (m_only) {
+			if (list.empty()) return nullptr;
+			if (list.size() == 1) return list.front();
+		}
 		return ASTree::c_ptr(new T(list));
 	}
 	virtual bool match(Lexer& l) override {

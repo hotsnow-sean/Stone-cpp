@@ -1,5 +1,6 @@
 #include "BasicType.h"
 #include "NestedEnv.h"
+#include "StoneException.h"
 #include <sstream>
 
 // ******************** Integer ********************
@@ -24,7 +25,7 @@ bool Integer::__eq__(SObject::c_ptr other) const {
 }
 bool Integer::__bool__() const noexcept { return m_value != 0; }
 SObject::ptr Integer::__add__(SObject::c_ptr other) const {
-	if (other->__name__ == String::TYPE) return other->__add__(this->shared_from_this());
+	if (other->__name__ == String::TYPE) return SObject::ptr(new String(__str__() + other->__str__()));
 	if (other->__name__ != TYPE) throw StoneException("error type for '+': " + *(other->__name__));
 	auto o = std::dynamic_pointer_cast<const Integer>(other);
 	return SObject::ptr(new Integer(m_value + o->m_value));
@@ -98,5 +99,28 @@ Environment* Function::makeEnv() const { return new NestedEnv(env); }
 std::string Function::__str__() const noexcept {
 	std::stringstream ss;
 	ss << "<fun:" << this << ">";
+	return ss.str();
+}
+
+// ******************** Function ********************
+
+const std::shared_ptr<const std::string> NativeFunction::TYPE{ new std::string("NativeFunction") };
+NativeFunction::NativeFunction(const std::string& name, method_ptr m, int argnum) : SObject(TYPE), name(name), method(m), numParams(argnum) {}
+
+int NativeFunction::numOfParameters() const noexcept {
+	return numParams;
+}
+
+SObject::ptr NativeFunction::invoke(const std::vector<SObject::ptr>& args, ASTree::c_ptr tree) {
+	try {
+		return method(args);
+	} catch (...) {
+		throw StoneException("bad native function call: " + name, tree);
+	}
+}
+
+std::string NativeFunction::__str__() const noexcept {
+	std::stringstream ss;
+	ss << "<native:" << this << ">";
 	return ss.str();
 }

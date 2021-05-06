@@ -122,7 +122,7 @@ public:
 	virtual SObject::ptr eval(Environment& env, SObject::ptr value) const = 0;
 };
 
-class Arguments : public Postfix {
+class Arguments : public Postfix, public std::enable_shared_from_this<Arguments> {
 public:
 	using Postfix::Postfix;
 
