@@ -147,6 +147,7 @@
     <ClInclude Include="Environment.h" />
     <ClInclude Include="FuncParser.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="Natives.h" />
     <ClInclude Include="NestedEnv.h" />
     <ClInclude Include="Parse.hpp" />
     <ClInclude Include="ParseException.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="FuncParser.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Natives.cpp" />
     <ClCompile Include="NestedEnv.cpp" />
     <ClCompile Include="ParseException.cpp" />
     <ClCompile Include="SObject.cpp" />

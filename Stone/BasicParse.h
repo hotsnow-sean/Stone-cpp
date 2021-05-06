@@ -15,7 +15,7 @@ protected:
 
 	ListRule<>* program;	// [ statement ] (";" | EOL)
 	OrRule* statement;		// "if" expr block [ "else" block ] | "while" expr block | simple
-	ListRule<>* simple;		// expr
+	ListRule<PaimaryExpr>* simple;		// expr
 	ListRule<BlockStmnt>* block; // "{" [ statement ] { (";" | EOL) [ statement ] } "}"
 	ListRule<>* expr;		// factor { OP factor }
 	OrRule* factor;			// "-" primary | primary
