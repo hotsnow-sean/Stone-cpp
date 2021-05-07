@@ -110,7 +110,7 @@ void Lexer::readLine() {
 	if (line.size()) {
 		throw ParseException("bad token at line " + std::to_string(line_number));
 	}
-	queue.push_back(Token::c_ptr(new IdToken(line_number, Token::eol)));
+	queue.push_back(std::make_shared<IdToken>(line_number, Token::eol));
 }
 
 void Lexer::addToken(int lineNo, const std::smatch& matcher) {
@@ -118,11 +118,11 @@ void Lexer::addToken(int lineNo, const std::smatch& matcher) {
 	if (m.empty() || matcher[2].matched) return; // 2 ºÅ¼´×¢ÊÍÆ¥Åä²¿·Ö
 	Token::c_ptr t;
 	if (matcher[3].matched) {
-		t.reset(new NumToken(lineNo, std::stoi(m)));
+		t = std::make_shared<const NumToken>(lineNo, std::stoi(m));
 	} else if (matcher[4].matched) {
-		t.reset(new StrToken(lineNo, toStringLiteral(m)));
+		t = std::make_shared<const StrToken>(lineNo, toStringLiteral(m));
 	} else {
-		t.reset(new IdToken(lineNo, m));
+		t = std::make_shared<const IdToken>(lineNo, m);
 	}
 	queue.push_back(t);
 }

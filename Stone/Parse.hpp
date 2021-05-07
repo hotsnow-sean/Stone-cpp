@@ -37,7 +37,7 @@ public:
 	// 通过 Logic 继承
 	virtual void parse(Lexer& l, std::vector<ASTree::c_ptr>& list) override {
 		if (!match(l)) throw ParseException(l.peek(0));
-		list.push_back(ASTree::c_ptr(new T(l.read())));
+		list.push_back(std::make_shared<T>(l.read()));
 	}
 	virtual bool match(Lexer& l) override {
 		return l.peek(0)->isNumber();
@@ -53,7 +53,7 @@ public:
 	// 通过 Logic 继承
 	virtual void parse(Lexer& l, std::vector<ASTree::c_ptr>& list) override {
 		if (!match(l)) throw ParseException(l.peek(0));
-		list.push_back(ASTree::c_ptr(new T(l.read())));
+		list.push_back(std::make_shared<T>(l.read()));
 	}
 	virtual bool match(Lexer& l) override {
 		return l.peek(0)->isString();
@@ -71,7 +71,7 @@ public:
 	// 通过 Logic 继承
 	virtual void parse(Lexer& l, std::vector<ASTree::c_ptr>& list) override {
 		if (!match(l)) throw ParseException(l.peek(0));
-		list.push_back(ASTree::c_ptr(new T(l.read())));
+		list.push_back(std::make_shared<T>(l.read()));
 	}
 	virtual bool match(Lexer& l) override {
 		auto t = l.peek(0);
@@ -143,7 +143,7 @@ public:
 	// 通过 Logic 继承
 	virtual void parse(Lexer& l, std::vector<ASTree::c_ptr>& list) override {
 		if (match(l)) list.push_back(m_rule->parse(l));
-		else list.push_back(ASTree::c_ptr(new T(std::vector<ASTree::c_ptr>())));
+		else list.push_back(std::make_shared<T>(std::vector<ASTree::c_ptr>()));
 	}
 	virtual bool match(Lexer& l) override {
 		return m_rule->match(l);
@@ -220,13 +220,13 @@ private:
 		return prec <= std::get<0>(nextPrec);
 	}
 	ASTree::c_ptr doShift(Lexer& l, ASTree::c_ptr left, int prec) {
-		ASTree::c_ptr op(new ASTLeaf(l.read()));
+		ASTree::c_ptr op = std::make_shared<const ASTLeaf>(l.read());
 		auto right = m_factor->parse(l);
 		Precedence next;
 		while (nextOperator(l, next) && rightIsExpr(prec, next)) {
 			right = doShift(l, right, std::get<0>(next));
 		}
-		return ASTree::c_ptr(new T({ left, op, right }));
+		return std::make_shared<T>(std::vector<ASTree::c_ptr>{left, op, right});
 	}
 	bool nextOperator(Lexer& l, Precedence& p) {
 		auto t = l.peek(0);
@@ -331,7 +331,7 @@ public:
 			if (list.empty()) return nullptr;
 			if (list.size() == 1) return list.front();
 		}
-		return ASTree::c_ptr(new T(list));
+		return std::make_shared<T>(list);
 	}
 	virtual bool match(Lexer& l) override {
 		for (auto r : m_rules) {
@@ -350,8 +350,11 @@ private:
 public:
 	OrRule(const std::vector<Rule*>& r) : m_rules(r) {}
 
-	void addRule(const std::vector<Rule*>& r) {
+	void push_back(const std::vector<Rule*>& r) {
 		m_rules.insert(m_rules.end(), r.begin(), r.end());
+	}
+	void push_front(const std::vector<Rule*>& r) {
+		m_rules.insert(m_rules.begin(), r.begin(), r.end());
 	}
 
 	// 通过 Rule 继承

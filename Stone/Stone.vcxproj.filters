@@ -75,6 +75,9 @@
     <ClInclude Include="ClassParser.h">
       <Filter>语法分析器</Filter>
     </ClInclude>
+    <ClInclude Include="ArrayParser.h">
+      <Filter>语法分析器</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Token.cpp">
@@ -117,6 +120,9 @@
       <Filter>Stone语言</Filter>
     </ClCompile>
     <ClCompile Include="ClassParser.cpp">
+      <Filter>语法分析器</Filter>
+    </ClCompile>
+    <ClCompile Include="ArrayParser.cpp">
       <Filter>语法分析器</Filter>
     </ClCompile>
   </ItemGroup>

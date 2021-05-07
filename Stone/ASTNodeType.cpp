@@ -8,7 +8,7 @@ int NumberLiteral::value() const {
 }
 
 SObject::ptr NumberLiteral::eval(Environment& env) const {
-	return SObject::ptr(new Integer(value()));
+	return std::make_shared<Integer>(value());
 }
 
 std::string Name::name() const {
@@ -51,6 +51,18 @@ SObject::ptr BinaryExpr::eval(Environment& env) const {
 					}
 				}
 			}
+			auto aref = std::dynamic_pointer_cast<const ArrayRef>(p->postfix(0));
+			if (aref) { // 若链式调用的最后是数组方括号运算
+				auto arr = std::dynamic_pointer_cast<Array>(p->evalSubExpr(env, 1));
+				if (arr) { // 确保运算调用者是数组对象
+					auto id = std::dynamic_pointer_cast<Integer>(aref->index()->eval(env));
+					if (id) {
+						(*arr)[id->value()] = r;
+						return r;
+					}
+				}
+				throw StoneException("bad array access " + location());
+			}
 		}
 		// 普通变量的赋值操作
 		auto n = std::dynamic_pointer_cast<const Name>(left());
@@ -64,9 +76,9 @@ SObject::ptr BinaryExpr::eval(Environment& env) const {
 		if (o == "*") return l->__mul__(r);
 		if (o == "/") return l->__div__(r);
 		if (o == "%") return l->__mod__(r);
-		if (o == "==") return SObject::ptr(new Boolean(l->__eq__(r)));
-		if (o == ">") return SObject::ptr(new Boolean(l->__gt__(r)));
-		if (o == "<") return SObject::ptr(new Boolean(l->__lt__(r)));
+		if (o == "==") return std::make_shared<Boolean>(l->__eq__(r));
+		if (o == ">") return std::make_shared<Boolean>(l->__gt__(r));
+		if (o == "<") return std::make_shared<Boolean>(l->__lt__(r));
 		throw StoneException("bad operator");
 	}
 }
@@ -81,7 +93,7 @@ std::string NegativeExpr::toString() const {
 
 SObject::ptr NegativeExpr::eval(Environment& env) const {
 	auto v = std::dynamic_pointer_cast<Integer>(oprand()->eval(env));
-	if (v) return SObject::ptr(new Integer(v->value()));
+	if (v) return std::make_shared<Integer>(v->value());
 	throw StoneException("bad type for '-'");
 }
 
@@ -137,15 +149,12 @@ std::string StringLiteral::value() const {
 }
 
 SObject::ptr StringLiteral::eval(Environment& env) const {
-	return SObject::ptr(new String(value()));
+	return std::make_shared<String>(value());
 }
 
 SObject::ptr BlockStmnt::eval(Environment& env) const {
 	SObject::ptr ret;
-	int num = numChildren();
-	for (int i = 0; i < num; i++) {
-		ret = child(i)->eval(env);
-	}
+	for (auto t : m_children) ret = t->eval(env);
 	return ret;
 }
 
@@ -178,8 +187,8 @@ std::string DefStmnt::toString() const {
 }
 
 SObject::ptr DefStmnt::eval(Environment& env) const {
-	env.putNew(name(), SObject::ptr(new Function(parameters(), body(), &env)));
-	return SObject::ptr(new String(name()));
+	env.putNew(name(), std::make_shared<Function>(parameters(), body(), &env));
+	return std::make_shared<String>(name());
 }
 
 int Arguments::size() const noexcept {
@@ -204,10 +213,8 @@ SObject::ptr Arguments::eval(Environment& env, SObject::ptr value) const {
 	if (!params) throw StoneException("bad parameters " + this->location());
 	if (size() != params->size()) throw StoneException("bas number of arguments " + this->location());
 	Environment* newEnv = func->makeEnv(); // 创建一个临时的函数计算环境
-	int num = 0, sum = numChildren();
-	for (int i = 0; i < sum; i++) {
-		params->eval(newEnv, num++, child(i)->eval(env));
-	}
+	int num = 0;
+	for (auto t : m_children) params->eval(newEnv, num++, t->eval(env));
 	auto ret = func->body()->eval(*newEnv);
 	delete newEnv; // 返回运行结果前销毁函数上下文
 	return ret;
@@ -259,8 +266,8 @@ std::string ClassStmnt::toString() const {
 }
 
 SObject::ptr ClassStmnt::eval(Environment& env) const {
-	env.put(name(), SObject::ptr(new ClassInfo(this->shared_from_this(), &env)));
-	return SObject::ptr(new String(name()));
+	env.put(name(), std::make_shared<ClassInfo>(this->shared_from_this(), &env));
+	return std::make_shared<String>(name());
 }
 
 std::string Dot::name() const {
@@ -276,7 +283,7 @@ SObject::ptr Dot::eval(Environment& env, SObject::ptr value) const {
 	auto ci = std::dynamic_pointer_cast<ClassInfo>(value);
 	if (ci && member == "new") {
 		auto e = new NestedEnv(ci->environment());
-		SObject::ptr so(new StoneObject(e));
+		auto so = std::make_shared<StoneObject>(e);
 		initObject(ci, e);
 		return so;
 	}
@@ -297,9 +304,36 @@ void Dot::initObject(SObject::ptr ci, Environment* env) const {
 }
 
 SObject::ptr ClassBody::eval(Environment& env) const {
-	int num = numChildren();
-	for (int i = 0; i < num; i++) {
-		child(i)->eval(env);
-	}
+	for (auto t : m_children) t->eval(env);
 	return nullptr;
+}
+
+int ArrayLiteral::size() const noexcept {
+	return numChildren();
+}
+
+SObject::ptr ArrayLiteral::eval(Environment& env) const {
+	auto res = std::make_shared<Array>(m_children.size());
+	size_t i = 0;
+	for (auto t : m_children) {
+		(*res)[i++] = t->eval(env);
+	}
+	return res;
+}
+
+ASTree::c_ptr ArrayRef::index() const {
+	return child(0);
+}
+
+std::string ArrayRef::toString() const {
+	return "[" + index()->toString() + "]";
+}
+
+SObject::ptr ArrayRef::eval(Environment& env, SObject::ptr value) const {
+	auto arr = std::dynamic_pointer_cast<Array>(value);
+	if (arr) {
+		auto id = std::dynamic_pointer_cast<Integer>(index()->eval(env));
+		if (id) return (*arr)[id->value()];
+	}
+	throw StoneException("bad array access " + location());
 }

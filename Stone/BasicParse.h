@@ -5,11 +5,14 @@
 
 #include "ASTNodeType.h"
 #include "Parse.hpp"
+#include <unordered_set>
 
 // 基本的语法解析器
 class BasicParse
 {
 protected:
+	static std::unordered_set<std::string> m_reserved;
+
 	Lexer& m_lexer;
 	ParseFactory m_factory;
 
@@ -20,6 +23,10 @@ protected:
 	ListRule<>* expr;		// factor { OP factor }
 	OrRule* factor;			// "-" primary | primary
 	ListRule<PrimaryExpr>* primary;	// "(" expr ")" | NUMBER | IDENTIFIER | STRING
+
+	ListRule<NullStmnt>* nulltemp; // 空语句解析器，即不包含任何逻辑的规则
+	OrRule* primaryOr; // 辅助规则
+	OrRule* programOr;
 
 public:
 	BasicParse(Lexer& l);

@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ArrayParser.h" />
     <ClInclude Include="ASTNodeType.h" />
     <ClInclude Include="ASTree.h" />
     <ClInclude Include="BasicEnv.h" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Token.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ArrayParser.cpp" />
     <ClCompile Include="ASTNodeType.cpp" />
     <ClCompile Include="ASTree.cpp" />
     <ClCompile Include="BasicEnv.cpp" />

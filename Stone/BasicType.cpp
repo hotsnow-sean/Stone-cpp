@@ -6,7 +6,7 @@
 
 // ******************** Integer ********************
 
-const std::shared_ptr<const std::string> Integer::TYPE{ new std::string("Integer") };
+const std::shared_ptr<const std::string> Integer::TYPE = std::make_shared<const std::string>("Integer");
 Integer::Integer(int v) : SObject(TYPE), m_value(v) {}
 
 bool Integer::__lt__(SObject::c_ptr other) const {
@@ -26,30 +26,30 @@ bool Integer::__eq__(SObject::c_ptr other) const {
 }
 bool Integer::__bool__() const noexcept { return m_value != 0; }
 SObject::ptr Integer::__add__(SObject::c_ptr other) const {
-	if (other->__name__ == String::TYPE) return SObject::ptr(new String(__str__() + other->__str__()));
+	if (other->__name__ == String::TYPE) return std::make_shared<String>(__str__() + other->__str__());
 	if (other->__name__ != TYPE) throw StoneException("error type for '+': " + *(other->__name__));
 	auto o = std::dynamic_pointer_cast<const Integer>(other);
-	return SObject::ptr(new Integer(m_value + o->m_value));
+	return std::make_shared<Integer>(m_value + o->m_value);
 }
 SObject::ptr Integer::__sub__(SObject::c_ptr other) const {
 	if (other->__name__ != TYPE) throw StoneException("error type for '-': " + *(other->__name__));
 	auto o = std::dynamic_pointer_cast<const Integer>(other);
-	return SObject::ptr(new Integer(m_value - o->m_value));
+	return std::make_shared<Integer>(m_value - o->m_value);
 }
 SObject::ptr Integer::__mul__(SObject::c_ptr other) const {
 	if (other->__name__ != TYPE) throw StoneException("error type for '*': " + *(other->__name__));
 	auto o = std::dynamic_pointer_cast<const Integer>(other);
-	return SObject::ptr(new Integer(m_value * o->m_value));
+	return std::make_shared<Integer>(m_value * o->m_value);
 }
 SObject::ptr Integer::__div__(SObject::c_ptr other) const {
 	if (other->__name__ != TYPE) throw StoneException("error type for '/': " + *(other->__name__));
 	auto o = std::dynamic_pointer_cast<const Integer>(other);
-	return SObject::ptr(new Integer(m_value / o->m_value));
+	return std::make_shared<Integer>(m_value / o->m_value);
 }
 SObject::ptr Integer::__mod__(SObject::c_ptr other) const {
 	if (other->__name__ != TYPE) throw StoneException("error type for '%': " + *(other->__name__));
 	auto o = std::dynamic_pointer_cast<const Integer>(other);
-	return SObject::ptr(new Integer(m_value % o->m_value));
+	return std::make_shared<Integer>(m_value % o->m_value);
 }
 std::string Integer::__str__() const noexcept { return std::to_string(m_value); }
 
@@ -57,7 +57,7 @@ int Integer::value() const noexcept { return m_value; }
 
 // ******************** String ********************
 
-const std::shared_ptr<const std::string> String::TYPE{ new std::string("String") };
+const std::shared_ptr<const std::string> String::TYPE = std::make_shared<const std::string>("String");
 String::String(const std::string& str) : SObject(TYPE), m_value(str) {}
 
 bool String::__eq__(SObject::c_ptr other = false) const {
@@ -67,7 +67,7 @@ bool String::__eq__(SObject::c_ptr other = false) const {
 }
 bool String::__bool__() const noexcept { return m_value.size(); }
 SObject::ptr String::__add__(SObject::c_ptr other = false) const {
-	return SObject::ptr(new String(m_value + other->__str__()));
+	return std::make_shared<String>(m_value + other->__str__());
 }
 std::string String::__str__() const noexcept { return m_value; }
 
@@ -75,7 +75,7 @@ std::string String::value() const noexcept { return m_value; }
 
 // ******************** Boolean ********************
 
-const std::shared_ptr<const std::string> Boolean::TYPE{ new std::string("Boolean") };
+const std::shared_ptr<const std::string> Boolean::TYPE = std::make_shared<const std::string>("Boolean");
 Boolean::Boolean(bool v) : SObject(TYPE), m_value(v) {}
 
 bool Boolean::__eq__(SObject::c_ptr other = false) const {
@@ -90,7 +90,7 @@ bool Boolean::value() const noexcept { return m_value; }
 
 // ******************** Function ********************
 
-const std::shared_ptr<const std::string> Function::TYPE{ new std::string("Function") };
+const std::shared_ptr<const std::string> Function::TYPE = std::make_shared<const std::string>("Function");
 Function::Function(ASTree::c_ptr p, ASTree::c_ptr body, Environment* env) : SObject(TYPE), m_parameters(p), m_body(body), env(env) {}
 
 ASTree::c_ptr Function::parameters() const { return m_parameters; }
@@ -105,7 +105,7 @@ std::string Function::__str__() const noexcept {
 
 // ******************** Function ********************
 
-const std::shared_ptr<const std::string> NativeFunction::TYPE{ new std::string("NativeFunction") };
+const std::shared_ptr<const std::string> NativeFunction::TYPE = std::make_shared<const std::string>("NativeFunction");
 NativeFunction::NativeFunction(const std::string& name, method_ptr m, int argnum) : SObject(TYPE), name(name), method(m), numParams(argnum) {}
 
 int NativeFunction::numOfParameters() const noexcept {
@@ -126,7 +126,9 @@ std::string NativeFunction::__str__() const noexcept {
 	return ss.str();
 }
 
-const std::shared_ptr<const std::string> ClassInfo::TYPE{ new std::string("ClassInfo") };
+// ******************** ClassInfo ********************
+
+const std::shared_ptr<const std::string> ClassInfo::TYPE = std::make_shared<const std::string>("ClassInfo");
 ClassInfo::ClassInfo(ASTree::c_ptr cs, Environment* env) : SObject(TYPE), definition(cs), m_superClass(nullptr), env(env) {
 	auto d = std::dynamic_pointer_cast<const ClassStmnt>(definition);
 	if (!d) throw StoneException("bad class defination");
@@ -160,7 +162,9 @@ std::string ClassInfo::__str__() const noexcept {
 	return "<class " + name() + ">";
 }
 
-const std::shared_ptr<const std::string> StoneObject::TYPE{ new std::string("StoneObject") };
+// ******************** StoneObject ********************
+
+const std::shared_ptr<const std::string> StoneObject::TYPE = std::make_shared<const std::string>("StoneObject");
 StoneObject::StoneObject(Environment* env) : SObject(TYPE), env(env) {}
 
 StoneObject::~StoneObject() {
@@ -185,4 +189,11 @@ Environment* StoneObject::getEnv(const std::string& member) {
 	auto e = env->where(member);
 	if (e && e == env) return e;
 	throw StoneException("object member access error: " + member);
+}
+
+const std::shared_ptr<const std::string> Array::TYPE = std::make_shared<const std::string>("Array");
+Array::Array(size_t size) : SObject(TYPE), m_array(size) {}
+
+SObject::ptr& Array::operator[](size_t n) {
+	return m_array.at(n);
 }

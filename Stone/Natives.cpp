@@ -17,10 +17,10 @@ static SObject::ptr print(const std::vector<SObject::ptr>& args) {
 static const clock_t startTime = clock();
 
 static SObject::ptr currentTime(const std::vector<SObject::ptr>& args) {
-	return SObject::ptr(new Integer((int)(clock() - startTime)));
+	return std::make_shared<Integer>((int)(clock() - startTime));
 }
 
 void Natives::appendNatives(Environment& env) {
-	env.put("print", SObject::ptr(new NativeFunction("print", &print, -1)));
-	env.put("currentTime", SObject::ptr(new NativeFunction("currentTime", &currentTime, 0)));
+	env.put("print", std::make_shared<NativeFunction>("print", &print, -1));
+	env.put("currentTime", std::make_shared<NativeFunction>("currentTime", &currentTime, 0));
 }

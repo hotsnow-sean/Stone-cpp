@@ -163,3 +163,23 @@ public:
 protected:
 	void initObject(SObject::ptr ci, Environment* env) const;
 };
+
+class ArrayLiteral : public ASTList {
+public:
+	using ASTList::ASTList;
+
+	int size() const noexcept;
+
+	virtual SObject::ptr eval(Environment& env) const override;
+};
+
+class ArrayRef : public Postfix {
+public:
+	using Postfix::Postfix;
+
+	ASTree::c_ptr index() const;
+	std::string toString() const final;
+
+	// Í¨¹ý Postfix ¼Ì³Ð
+	virtual SObject::ptr eval(Environment& env, SObject::ptr value) const override;
+};

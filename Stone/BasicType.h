@@ -139,3 +139,14 @@ public:
 protected:
 	Environment* getEnv(const std::string& member);
 };
+
+class Array : public SObject {
+protected:
+	std::vector<SObject::ptr> m_array;
+
+public:
+	static const std::shared_ptr<const std::string> TYPE;
+	Array(size_t size);
+
+	SObject::ptr& operator[](size_t n);
+};

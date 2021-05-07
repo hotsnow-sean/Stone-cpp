@@ -1,7 +1,7 @@
 #include "Token.h"
 #include "StoneException.h"
 
-const Token::c_ptr Token::eof(new Token(-1));
+const Token::c_ptr Token::eof = std::make_shared<const Token>(-1);
 const std::string Token::eol("\\n");
 
 Token::Token(int line) : line_number(line) {}
