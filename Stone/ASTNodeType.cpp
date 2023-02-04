@@ -40,11 +40,11 @@ SObject::ptr BinaryExpr::eval(Environment& env) const {
 		auto p = std::dynamic_pointer_cast<const PrimaryExpr>(left());
 		if (p && p->hasPostfix(0)) {
 			auto member = std::dynamic_pointer_cast<const Dot>(p->postfix(0));
-			if (member) { // ÈôÁ´Ê½µ÷ÓÃµÄ×îºóÊÇµã³ÉÔ±±äÁ¿ÔËËã
+			if (member) { // è‹¥é“¾å¼è°ƒç”¨çš„æœ€åæ˜¯ç‚¹æˆå‘˜å˜é‡è¿ç®—
 				auto obj = std::dynamic_pointer_cast<StoneObject>(p->evalSubExpr(env, 1));
-				if (obj) { // È·±£ÔËËãµ÷ÓÃÕßÊÇÊµÀı¶ÔÏó
+				if (obj) { // ç¡®ä¿è¿ç®—è°ƒç”¨è€…æ˜¯å®ä¾‹å¯¹è±¡
 					try {
-						obj->write(member->name(), r); // Îª¶ÔÏóµÄ³ÉÔ±¸³Öµ
+						obj->write(member->name(), r); // ä¸ºå¯¹è±¡çš„æˆå‘˜èµ‹å€¼
 						return r;
 					} catch (const std::exception&) {
 						throw StoneException("bad member access " + location() + ": " + member->name());
@@ -52,9 +52,9 @@ SObject::ptr BinaryExpr::eval(Environment& env) const {
 				}
 			}
 			auto aref = std::dynamic_pointer_cast<const ArrayRef>(p->postfix(0));
-			if (aref) { // ÈôÁ´Ê½µ÷ÓÃµÄ×îºóÊÇÊı×é·½À¨ºÅÔËËã
+			if (aref) { // è‹¥é“¾å¼è°ƒç”¨çš„æœ€åæ˜¯æ•°ç»„æ–¹æ‹¬å·è¿ç®—
 				auto arr = std::dynamic_pointer_cast<Array>(p->evalSubExpr(env, 1));
-				if (arr) { // È·±£ÔËËãµ÷ÓÃÕßÊÇÊı×é¶ÔÏó
+				if (arr) { // ç¡®ä¿è¿ç®—è°ƒç”¨è€…æ˜¯æ•°ç»„å¯¹è±¡
 					auto id = std::dynamic_pointer_cast<Integer>(aref->index()->eval(env));
 					if (id) {
 						(*arr)[id->value()] = r;
@@ -64,7 +64,7 @@ SObject::ptr BinaryExpr::eval(Environment& env) const {
 				throw StoneException("bad array access " + location());
 			}
 		}
-		// ÆÕÍ¨±äÁ¿µÄ¸³Öµ²Ù×÷
+		// æ™®é€šå˜é‡çš„èµ‹å€¼æ“ä½œ
 		auto n = std::dynamic_pointer_cast<const Name>(left());
 		if (!n) throw StoneException("bad assignment");
 		env.put(n->name(), r);
@@ -93,7 +93,7 @@ std::string NegativeExpr::toString() const {
 
 SObject::ptr NegativeExpr::eval(Environment& env) const {
 	auto v = std::dynamic_pointer_cast<Integer>(oprand()->eval(env));
-	if (v) return std::make_shared<Integer>(v->value());
+	if (v) return std::make_shared<Integer>(-(v->value()));
 	throw StoneException("bad type for '-'");
 }
 
@@ -212,11 +212,11 @@ SObject::ptr Arguments::eval(Environment& env, SObject::ptr value) const {
 	auto params = std::dynamic_pointer_cast<const ParameterList>(func->parameters());
 	if (!params) throw StoneException("bad parameters " + this->location());
 	if (size() != params->size()) throw StoneException("bas number of arguments " + this->location());
-	Environment* newEnv = func->makeEnv(); // ´´½¨Ò»¸öÁÙÊ±µÄº¯Êı¼ÆËã»·¾³
+	Environment* newEnv = func->makeEnv(); // åˆ›å»ºä¸€ä¸ªä¸´æ—¶çš„å‡½æ•°è®¡ç®—ç¯å¢ƒ
 	int num = 0;
 	for (auto t : m_children) params->eval(newEnv, num++, t->eval(env));
 	auto ret = func->body()->eval(*newEnv);
-	delete newEnv; // ·µ»ØÔËĞĞ½á¹ûÇ°Ïú»Ùº¯ÊıÉÏÏÂÎÄ
+	delete newEnv; // è¿”å›è¿è¡Œç»“æœå‰é”€æ¯å‡½æ•°ä¸Šä¸‹æ–‡
 	return ret;
 }
 
